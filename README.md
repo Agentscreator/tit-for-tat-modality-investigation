@@ -26,6 +26,16 @@ a long time to build also take a long time to lose?
   > exits" and dropped from the median (73.9% of agents at G = 160). That pulls the fit
   > down. Up to G = 40, the measured medians match the exact solution.
 
+- **Phase 4, intermittent betrayal.** After G good rounds, the partner defects with
+  probability q each round instead of every round. After 20 good rounds, 0% of agents
+  leave a partner who defects 30% of the time, and 4.4% leave one who defects half the
+  time. Leaving only becomes common once q is above (1 + θ) / 2 ≈ 0.72. A 30%-bad partner
+  still pays 2.16 per round, close to the population average of about 2.28. The costly
+  blind spot is the 50–80% band, where staying pays 0.4–1.5 per round and most agents
+  stay for hundreds of rounds.
+
+The full writeup is in [`WRITEUP.md`](WRITEUP.md).
+
 ## Model
 
 - **Population:** 200 evolving agents, 40 tit for tat and 80 pure defectors; 80 rounds
@@ -56,7 +66,10 @@ a long time to build also take a long time to lose?
 | `engine.py` | Generation runner and evolutionary loop with exit-cost modes |
 | `run_all.py` | Phases 1 and 2 → `results.json` |
 | `phase3.py` | Phase 3 controlled betrayal test → `phase3.json` |
-| `results.json`, `phase3.json` | Saved results (mean ± 95% CI over seeds 1–5) |
+| `phase4.py` | Phase 4 intermittent betrayal test → `phase4.json` |
+| `results.json`, `phase3.json`, `phase4.json` | Saved results (seeds 1–5) |
+| `genomes_free.json` | Final genomes evolved under free exit, 5 seeds × 200 (cached by `phase4.py`) |
+| `WRITEUP.md` | Full writeup of all four phases |
 
 ## Running
 
@@ -64,9 +77,10 @@ a long time to build also take a long time to lose?
 pip install numpy
 python run_all.py   # Phases 1–2
 python phase3.py    # Phase 3
+python phase4.py    # Phase 4 (~2 min the first time, while it evolves genomes)
 ```
 
-Both scripts write their output to the hardcoded path `/home/claude/study7/`. Change that
+`run_all.py` and `phase3.py` write their output to the hardcoded path `/home/claude/study7/`. Change that
 path to a local one before running. To remove the Phase 3 cut-off, raise `MAXR` in
 `phase3.py`. At G = 160 the mean genome needs about 380 rounds of betrayal on top of the
 160 good rounds.

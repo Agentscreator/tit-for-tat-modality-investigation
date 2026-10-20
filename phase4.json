@@ -1,0 +1,142 @@
+{
+  "horizon": 1000,
+  "reps": 5,
+  "mean_theta": 0.4311903285802581,
+  "table": {
+    "0|0.1": {
+      "leave_pct": 7.859999999999999,
+      "median_lag": 1.0,
+      "payoff_per_round": 2.4456501333333334
+    },
+    "0|0.2": {
+      "leave_pct": 16.34,
+      "median_lag": 1.0,
+      "payoff_per_round": 1.9192537696969698
+    },
+    "0|0.3": {
+      "leave_pct": 27.620000000000005,
+      "median_lag": 1.0,
+      "payoff_per_round": 1.366398087823288
+    },
+    "0|0.5": {
+      "leave_pct": 54.3,
+      "median_lag": 1.0,
+      "payoff_per_round": 0.45846248992353916
+    },
+    "0|0.6": {
+      "leave_pct": 68.14000000000001,
+      "median_lag": 1.0,
+      "payoff_per_round": 0.07020925586418525
+    },
+    "0|0.7": {
+      "leave_pct": 79.85999999999999,
+      "median_lag": 1.0,
+      "payoff_per_round": -0.2331525407039469
+    },
+    "0|0.8": {
+      "leave_pct": 88.12,
+      "median_lag": 1.0,
+      "payoff_per_round": -0.4853719043188317
+    },
+    "0|0.9": {
+      "leave_pct": 93.14000000000001,
+      "median_lag": 1.0,
+      "payoff_per_round": -0.6902993931310127
+    },
+    "0|1.0": {
+      "leave_pct": 97.4,
+      "median_lag": 1.0,
+      "payoff_per_round": -0.8572948650426314
+    },
+    "20|0.1": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 2.7321814
+    },
+    "20|0.2": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 2.4502300000000004
+    },
+    "20|0.3": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 2.1554092000000002
+    },
+    "20|0.5": {
+      "leave_pct": 4.42,
+      "median_lag": 326.8,
+      "payoff_per_round": 1.5181311769693007
+    },
+    "20|0.6": {
+      "leave_pct": 25.8,
+      "median_lag": 185.0,
+      "payoff_per_round": 1.1631311581127197
+    },
+    "20|0.7": {
+      "leave_pct": 48.019999999999996,
+      "median_lag": 118.8,
+      "payoff_per_round": 0.7966904298531333
+    },
+    "20|0.8": {
+      "leave_pct": 68.26,
+      "median_lag": 81.2,
+      "payoff_per_round": 0.42696050628466126
+    },
+    "20|0.9": {
+      "leave_pct": 84.64,
+      "median_lag": 60.8,
+      "payoff_per_round": 0.05703540237049398
+    },
+    "20|1.0": {
+      "leave_pct": 95.8,
+      "median_lag": 47.4,
+      "payoff_per_round": -0.31808963199196166
+    },
+    "80|0.1": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 2.7317202
+    },
+    "80|0.2": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 2.4510122
+    },
+    "80|0.3": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 2.1562484
+    },
+    "80|0.5": {
+      "leave_pct": 0.08,
+      "median_lag": 844.0,
+      "payoff_per_round": 1.522846605557979
+    },
+    "80|0.6": {
+      "leave_pct": 16.2,
+      "median_lag": 519.8,
+      "payoff_per_round": 1.1826198151187162
+    },
+    "80|0.7": {
+      "leave_pct": 38.16,
+      "median_lag": 380.6,
+      "payoff_per_round": 0.8295605469056957
+    },
+    "80|0.8": {
+      "leave_pct": 58.1,
+      "median_lag": 282.6,
+      "payoff_per_round": 0.4592946546652694
+    },
+    "80|0.9": {
+      "leave_pct": 75.96000000000001,
+      "median_lag": 214.4,
+      "payoff_per_round": 0.08037303802340925
+    },
+    "80|1.0": {
+      "leave_pct": 89.6,
+      "median_lag": 172.3,
+      "payoff_per_round": -0.3067214874000193
+    }
+  }
+}
