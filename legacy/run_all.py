@@ -1,5 +1,5 @@
 import sys, json, warnings
-sys.path.insert(0, '/home/claude/study7')
+
 import numpy as np
 from engine import evolve, run_generation
 from core import random_genome, GENE_BOUNDS, OBS_NOISE_VAR
@@ -47,6 +47,6 @@ for mode in ['free','flat','entangled']:
     print(f"  --- {mode} ---")
     for k,(m,e) in R['phase2'][mode].items(): print(f"    {k:22s} {m:8.2f} ± {e:.2f}")
 
-json.dump(R, open('/home/claude/study7/results.json','w'),
+json.dump(R, open('results.json','w'),
           indent=2, default=lambda o: list(o))
 print("\nsaved")

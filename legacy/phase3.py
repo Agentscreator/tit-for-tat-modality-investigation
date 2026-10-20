@@ -1,4 +1,4 @@
-import sys, json; sys.path.insert(0,'/home/claude/study7')
+import sys, json; 
 import numpy as np
 from engine import evolve
 from core import GENE_BOUNDS, OBS_NOISE_VAR
@@ -53,4 +53,4 @@ for genomes in pops:
     sf=[r for r in stranger if r]; ef=[r for r in ex if r]
     if sf and ef: rows.append(np.median(ef)/np.median(sf))
 print(f"  ratio (20 good rounds vs stranger): {np.mean(rows):.1f}x  ± {1.96*np.std(rows,ddof=1)/np.sqrt(len(rows)):.1f}")
-json.dump(table, open('/home/claude/study7/phase3.json','w'), indent=2)
+json.dump(table, open('phase3.json','w'), indent=2)
