@@ -20,6 +20,11 @@ continuous betrayal for every good round that came first**.
   20 good rounds, no agent leaves a partner who defects 30% of the time. Only 4% leave one
   who defects half the time. But staying is usually not the disaster it sounds like. The
   real cost sits in the middle band, where the partner is bad 50–80% of the time.
+- **Phase 5:** each agent splits 100 points across trust, attraction and provision.
+  Conjunctive (near-min) scoring pushes the split close to balanced under every return
+  curve we tried, even when specialising pays. Additive scoring lets specialists take over
+  only when returns compound (96% specialists). Otherwise its pull is so weak that
+  allocations drift at random.
 
 **Correction to an earlier figure.** An earlier reading put the Phase 3 slope at 1.27.
 That number is a straight-line fit through all ten Phase 3 points. The top points are cut
@@ -222,6 +227,81 @@ in round one drops a fresh belief below the line. So 28% of agents leave a 30%-b
 immediately, and 54% leave a half-bad one. Without history the agent is twitchy, and with
 history it is blind to mixed signals. Both come from the same filter.
 
+## Phase 5: specialists vs generalists
+
+**Question.** Study 5 aggregates a relationship's channels conjunctively: a weak channel
+sinks the whole thing unless the others compensate hard. Does that rule reward being
+well-rounded? And does an additive rule, where strength can make up for weakness, reward
+specialists instead?
+
+**Design.** Each evolving agent splits a fixed budget of 100 points across three channels
+(trust, attraction and provision) at birth, and evolution picks the split. Points turn
+into channel score with a curvature γ: score = (points / 100)^γ. Below 1 means diminishing
+returns, 1 means linear, and above 1 means compounding returns (specialising pays extra).
+A partner's **worth** is a power mean of its three channel scores with exponent ρ:
+
+- **Conjunctive:** ρ = −5, a near-min. A 60/30/10 split is worth 37% of a balanced one at
+  γ = 1.
+- **Additive:** ρ = 1, the plain average. A 60/30/10 split is worth the same as a balanced
+  one at γ = 1.
+
+Worth is rescaled so that the population average is 50, then used everywhere the old
+single value was used:
+- partners are sorted by it for assortative matching;
+- partners reject an agent on first contact if its worth falls below their threshold;
+- a round of mutual cooperation pays 3 × partner's worth / 50.
+
+The behaviour genes are fixed at the Phase 2 consensus, so only the split evolves. Each
+condition ran for 100 generations under free exit and 10% misperception, across 5 seeds.
+Splits are stored as three logits and mutated with SD 0.3.
+
+**Prediction.** Under a fixed budget, the power mean of x^γ is highest for a balanced
+split when γρ < 1, and for one channel when γρ > 1. Conjunctive (ρ < 0) should favour
+balance whatever γ is. Additive should favour balance with diminishing returns, drift
+with linear returns, and specialists with compounding returns.
+
+### Results
+
+Channels are interchangeable in this design, so we report each agent's shares sorted from
+largest to smallest. We call an agent a *specialist* if more than 60% of its budget goes
+to one channel. The figures are the mean over the last 10 generations, then across seeds
+(± 95% CI). For reference, a population starting from random splits has a largest share
+of 0.60. A perfectly balanced parent plus one round of mutation gives 0.42, which is the
+most balanced a mutating population can stay.
+
+| Rule | Returns (γ) | γρ | Predicted | Largest share | Smallest share | % specialists |
+| --- | --- | --- | --- | --- | --- | --- |
+| Conjunctive | 0.7, diminishing | −3.5 | balance | 0.50 | 0.20 | 14.5 ± 1.6 |
+| Conjunctive | 1.0, linear | −5.0 | balance | 0.48 | 0.21 | 10.2 ± 0.5 |
+| Conjunctive | 1.5, compounding | −7.5 | balance | 0.46 | 0.23 | 6.0 ± 0.4 |
+| Additive | 0.7, diminishing | 0.7 | balance | 0.64 ± 0.03 | 0.10 ± 0.02 | 56.2 ± 5.9 |
+| Additive | 1.0, linear | 1.0 | no pull | 0.68 ± 0.04 | 0.10 ± 0.02 | 62.1 ± 7.6 |
+| Additive | 1.5, compounding | 1.5 | specialise | 0.96 ± 0.01 | 0.01 | 96.1 ± 0.3 |
+
+(Shares without a CI had a CI below 0.01.)
+
+**1. Conjunctive scoring enforces balance, even against the incentive to specialise.**
+Under all three return curves, allocations moved from the random start (0.60) close to
+the mutation floor (0.42), and specialists fell to 6–15%. Compounding returns didn't
+change this. A weak channel costs more than a strong one gains, so specialists get sorted
+to the bottom of the matching pool and rejected on first contact.
+
+**2. Additive scoring flips to specialists only when returns compound.** At γ = 1.5, 96%
+of agents put almost the whole budget into one channel. This is the flip the hypothesis
+predicted, but it needs both ingredients: an additive rule and compounding returns.
+
+**3. Otherwise additive scoring barely pulls at all.** With linear returns there is no
+pull by design, and the population drifts to lopsided splits (62% specialists). Random
+walks on the split spread it out. With diminishing returns, balance is technically best,
+but a 60/30/10 split is still worth 96% of a balanced one. That pull is too weak to beat
+drift, so the result (56%) looks almost the same as no pull. Under an additive rule, how
+well-rounded a population ends up depends mostly on chance.
+
+**What this says about the original question.** Whether specialising or being
+well-rounded wins isn't a fixed fact. It depends on how a relationship combines its
+channels and on how investment pays off. Under conjunctive aggregation, being balanced
+isn't just optimal on paper. It is the only allocation selection actively holds in place.
+
 ## Discussion and limitations
 
 The ability to exit is what saves evolving agents from tit for tat's tail. The same belief
@@ -241,6 +321,14 @@ all, unless more than about 70% of the rounds are bad.
   exiters, not evolved ones.
 - **Phase 2's manipulation is weak.** Exit cost is only a cooldown of 1 to 10 rounds, with
   no payoff penalty.
+- **Phase 5's channels are interchangeable.** Trust, attraction and provision differ only
+  in name. Each counts the same toward worth and has no separate effect in the game, so
+  Phase 5 can't say whether trust in particular hardens faster or matters more.
+- **Phase 5's near-min exponent is assumed.** Study 5's exact conjunctive formula isn't in
+  this repo; ρ = −5 stands in for it. Any ρ < 0 gives the same prediction.
+- **Phase 5 fixes splits at birth.** Letting agents shift points over their lifetime, at
+  some cost or lag, would test whether evolution prefers being born balanced or being born
+  lopsided but adaptable.
 - **The 2.28 benchmark is rough.** It is the average payoff per round across a whole
   generation, not the measured value of leaving and finding someone new.
 
@@ -251,6 +339,7 @@ pip install numpy
 python run_all.py   # Phases 1–2 → results.json
 python phase3.py    # Phase 3   → phase3.json
 python phase4.py    # Phase 4   → phase4.json (evolves and caches genomes_free.json, ~2 min)
+python phase5.py    # Phase 5   → phase5.json (~2 min)
 ```
 
 `run_all.py` and `phase3.py` write their output to the hardcoded path

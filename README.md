@@ -33,6 +33,11 @@ a long time to build also take a long time to lose?
   still pays 2.16 per round, close to the population average of about 2.28. The costly
   blind spot is the 50–80% band, where staying pays 0.4–1.5 per round and most agents
   stay for hundreds of rounds.
+- **Phase 5, specialists vs generalists.** Agents split 100 points across trust,
+  attraction and provision, and evolution picks the split. Under conjunctive (near-min)
+  scoring, populations stay close to balanced (6–15% specialists) even when specialising
+  pays. Under additive scoring, specialists take over (96%) only when returns compound.
+  Otherwise the split drifts at random.
 
 The full writeup is in [`WRITEUP.md`](WRITEUP.md).
 
@@ -67,9 +72,10 @@ The full writeup is in [`WRITEUP.md`](WRITEUP.md).
 | `run_all.py` | Phases 1 and 2 → `results.json` |
 | `phase3.py` | Phase 3 controlled betrayal test → `phase3.json` |
 | `phase4.py` | Phase 4 intermittent betrayal test → `phase4.json` |
-| `results.json`, `phase3.json`, `phase4.json` | Saved results (seeds 1–5) |
+| `phase5.py` | Phase 5 channel-allocation tournament → `phase5.json` |
+| `results.json`, `phase3.json`, `phase4.json`, `phase5.json` | Saved results (seeds 1–5) |
 | `genomes_free.json` | Final genomes evolved under free exit, 5 seeds × 200 (cached by `phase4.py`) |
-| `WRITEUP.md` | Full writeup of all four phases |
+| `WRITEUP.md` | Full writeup of all five phases |
 
 ## Running
 
@@ -78,6 +84,7 @@ pip install numpy
 python run_all.py   # Phases 1–2
 python phase3.py    # Phase 3
 python phase4.py    # Phase 4 (~2 min the first time, while it evolves genomes)
+python phase5.py    # Phase 5 (~2 min)
 ```
 
 `run_all.py` and `phase3.py` write their output to the hardcoded path `/home/claude/study7/`. Change that
