@@ -24,7 +24,7 @@ def make_noise(n, seed):
     """Common random numbers: the same draws for every policy evaluated on these lives."""
     g = torch.Generator().manual_seed(seed)
     return {'turn': torch.rand(n, T, generator=g), 'move': torch.rand(n, T, generator=g),
-            'start': torch.rand(n, T, generator=g)}
+            'start': torch.rand(n, T, generator=g), 'leave': torch.rand(n, T, generator=g)}
 
 
 def run(policy, lam, noise):
@@ -44,6 +44,8 @@ def run(policy, lam, noise):
         bad = bad | (active & (noise['turn'][:, t] < lam))
         d = noise['move'][:, t] < torch.where(bad, torch.tensor(Q_BAD), torch.tensor(Q_GOOD))
         total += torch.where(active, torch.where(d, R_D, R_C), torch.tensor(0.0))
+        policy.u = noise['leave'][:, t]           # stochastic policies draw from shared noise
+        policy.active = active                    # for probes: which lives currently have a partner
         leave = policy.act(d) & active
         search = torch.where(leave, torch.tensor(SEARCH + 1), search)
     return total / T
