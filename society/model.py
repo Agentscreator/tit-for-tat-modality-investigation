@@ -15,7 +15,7 @@ Ladder: goodwill 0, willingness 1, commitment 2, dedication 3, devotion 4. Each 
 own rung and puts INVEST[rung] x sig(W) of production into the pair pot. The pot grows by SYNERGY,
 feeds the children of the household, and the rest is split evenly. Children need both partners at
 commitment or above. Each year an agent drops a rung if partner value < drop, else climbs if > climb, and
-leaves when it drops below goodwill. Warmth and fit are never seen: belief about each is a Kalman
+leaves when it drops below goodwill. A rung moves only in 70% of years (MOVE). Warmth and fit are never seen: belief about each is a Kalman
 estimate from one noisy reading per year. Nothing about anyone, or any pair, changes over time.
 Land is shared in proportion to productivity, so the population can't outgrow it.
 """
@@ -25,6 +25,7 @@ import numpy as np
 RUNGS = ['goodwill', 'willingness', 'commitment', 'dedication', 'devotion']
 INVEST = np.array([0.05, 0.2, 0.4, 0.6, 0.8])
 SYNERGY, NEED_A, NEED_C, FIT = 1.5, 0.6, 0.8, 0.6
+MOVE = 0.7                                  # chance a rung actually moves in a given year
 CUE_SD = np.array([1.0, 0.3, 0.3, 1.0])     # first-impression noise on W, K, B, F
 
 SPEC = ([(t, -4, 4) for t in 'WKB'] +                       # traits
@@ -41,6 +42,8 @@ NG, CAP = len(SPEC), 8000
 class World:
     warm_matters: bool = True     # False: everyone delivers 0.6 of their rung, whatever W
     bold_costs: bool = True       # False: boldness has no mortality cost
+    late_attention: bool = False  # True: take in a year's evidence only when near the drop line
+    mortality: float = 1.0        # multiplies every background death rate (0.25 ~ a modern society)
     years: int = 4000
     record_from: int = 3000
     cap: float = 500              # adults the land supports at full productivity
@@ -73,6 +76,12 @@ class Society:
         self.custodian = np.full(CAP, -1); self.last_birth = np.full(CAP, -99)
         self.wealth = np.zeros(CAP); self.pair = np.full(CAP, -1)
         self.year = 0; self.pairs = []; self.series = []
+        # life records (logging only; nothing below feeds back into the dynamics)
+        self.uid = np.full(CAP, -1); self.next_uid = 0; self.born_year = np.zeros(CAP, int)
+        self.n_pairs = np.zeros(CAP, int); self.n_committed = np.zeros(CAP, int)
+        self.first_pair = np.full(CAP, -1); self.first_commit = np.full(CAP, -1)
+        self.n_births = np.zeros(CAP, int); self.committed = np.zeros(CAP, bool)
+        self.v_last = np.ones(CAP); self.lives = []; self.kids_out = []
 
         n = 1000
         g = np.column_stack([rng.normal(0, .5, (n, 3)), rng.uniform(-2, 2, (n, 4)),
@@ -85,6 +94,11 @@ class Society:
         self.ph[ids] = g[:, :3] + self.rng.normal(0, .5, (len(ids), 3))
         self.partner[ids] = -1; self.rung[ids] = 0; self.wealth[ids] = 0
         self.last_birth[ids] = -99; self.pair[ids] = -1
+        self.uid[ids] = np.arange(self.next_uid, self.next_uid + len(ids)); self.next_uid += len(ids)
+        self.born_year[ids] = self.year - age
+        self.n_pairs[ids] = self.n_committed[ids] = self.n_births[ids] = 0
+        self.first_pair[ids] = self.first_commit[ids] = -1
+        self.committed[ids] = False; self.v_last[ids] = 1
 
     # ---------------------------------------------------------------- pairs
     def _unpair(self, a, reason):
@@ -95,6 +109,7 @@ class Society:
         self.partner[a] = self.partner[b] = -1
         self.rung[a] = self.rung[b] = 0
         self.pair[a] = self.pair[b] = -1
+        self.committed[a] = self.committed[b] = False
 
     def _pair(self, a, b, cue_a, cue_b):
         self.partner[a], self.partner[b] = b, a
@@ -102,12 +117,17 @@ class Society:
         self.bm[a], self.bm[b] = cue_a[[0, 3]], cue_b[[0, 3]]   # first impressions of W and F
         self.bv[a] = self.bv[b] = CUE_SD[[0, 3]] ** 2
         self.fit[a] = self.fit[b] = self._pending_fit
+        for x in (a, b):
+            self.n_pairs[x] += 1; self.v_last[x] = 1
+            if self.first_pair[x] < 0: self.first_pair[x] = self.age[x]
         if self.year >= self.w.record_from:
             self.pairs.append({'start': self.year, 'end': None, 'reason': None, 'a': int(a), 'b': int(b),
                                'ph_a': self.ph[a].tolist(), 'ph_b': self.ph[b].tolist(),
                                'age_a': int(self.age[a]), 'age_b': int(self.age[b]),
                                'fit': float(self.fit[a]),
-                               'kids': 0, 'raised': 0, 'top': 0})
+                               'kids': 0, 'raised': 0, 'top': 0, 't_commit': None, 't_devote': None,
+                               't_first_drop': None, 'va': [], 'vb': [], 'fa': [], 'fb': [],
+                               'wa': [], 'wb': []})
             self.pair[a] = self.pair[b] = len(self.pairs) - 1
 
     def _market(self, adults):
@@ -188,24 +208,40 @@ class Society:
         self.wealth[adults[short]] = 0
 
         # mortality
-        hz[kids] += 0.01 + 0.3 * np.exp(-3 * food / NEED_C) + 0.04 * (self.age[kids] == 0)
-        hz[adults] += 0.003 + 0.0006 * np.exp(0.09 * (self.age[adults] - 16))
-        hz[adults] += 0.004 * (np.exp(0.8 * B) if w.bold_costs else 1)
+        hz[kids] += w.mortality * (0.01 + 0.3 * np.exp(-3 * food / NEED_C) + 0.04 * (self.age[kids] == 0))
+        hz[adults] += w.mortality * (0.003 + 0.0006 * np.exp(0.09 * (self.age[adults] - 16)))
+        hz[adults] += w.mortality * 0.004 * (np.exp(0.8 * B) if w.bold_costs else 1)
 
         # learning and the ladder (all paired agents, simultaneously)
         p = paired; q = self.partner[p]
         obs = np.column_stack([self.ph[q, 0], self.fit[p]]) + rng.normal(0, 1, (len(p), 2))
         k = self.bv[p] / (self.bv[p] + 1)
+        if w.late_attention:                     # unattended evidence is simply lost
+            k = k * (np.abs(self.v_last[p] - self.g[p, G['drop']]) < 0.1)[:, None]
         self.bm[p] += k * (obs - self.bm[p]); self.bv[p] *= 1 - k
         seen = np.column_stack([self.bm[p, 0], self.ph[q, 1:] + rng.normal(0, 1, (len(p), 2)) * CUE_SD[1:3],
                                 self.bm[p, 1]])
         v = score(self.g[p], seen)
-        down = v < self.g[p, G['drop']]
-        up = ~down & (v > self.g[p, G['climb']])
+        moves = rng.random(len(p)) < MOVE              # commitment shifts unevenly, not on a clock
+        down = moves & (v < self.g[p, G['drop']])
+        up = moves & ~down & (v > self.g[p, G['climb']])
         self.rung[p] = np.minimum(self.rung[p] + up, 4) - down
-        for a in p:
+        self.v_last[p] = v
+        new = p[(self.rung[p] >= 2) & ~self.committed[p]]
+        self.committed[new] = True; self.n_committed[new] += 1
+        self.first_commit[new] = np.where(self.first_commit[new] < 0, self.age[new], self.first_commit[new])
+        for i, a in enumerate(p):
             r = self.pair[a]
-            if r >= 0: self.pairs[r]['top'] = max(self.pairs[r]['top'], int(max(self.rung[a], 0)))
+            if r < 0: continue
+            rec = self.pairs[r]; t = self.year - rec['start']
+            rec['top'] = max(rec['top'], int(max(self.rung[a], 0)))
+            if rec['t_commit'] is None and self.rung[a] >= 2 and self.rung[q[i]] >= 2: rec['t_commit'] = t
+            if rec['t_devote'] is None and self.rung[a] == 4 and self.rung[q[i]] == 4: rec['t_devote'] = t
+            if rec['t_first_drop'] is None and down[i] and rec['t_commit'] is not None: rec['t_first_drop'] = t
+            side = 'a' if a == rec['a'] else 'b'
+            rec['v' + side].append(round(float(v[i]), 3))
+            rec['f' + side].append(round(float(self.bm[a, 1]), 3))
+            rec['w' + side].append(round(float(self.bm[a, 0]), 3))
         for a in p[self.rung[p] < 0]:
             if self.partner[a] >= 0: self._unpair(a, 'exit')
         self.rung[self.rung < 0] = 0
@@ -227,6 +263,7 @@ class Society:
             cust = np.where(rng.random(len(free)) < 0.5, m1, m2)
             self.custodian[free] = cust
             self.last_birth[m1] = self.last_birth[m2] = self.year
+            self.n_births[m1] += 1; self.n_births[m2] += 1
             for c, x in zip(free, m1):
                 r = self.pair[x]
                 self.pair[c] = r                                 # birth household, for credit
@@ -237,6 +274,9 @@ class Society:
         dead = al[rng.random(len(al)) < 1 - np.exp(-hz[al])]
         for a in dead:
             if self.partner[a] >= 0: self._unpair(a, 'death')
+            if self.year >= self.w.record_from:
+                self._log_life(a)
+                if self.age[a] < 16: self._log_kid(a, False)
         self.alive[dead] = False
         self.partner[dead] = -1
         self.custodian[np.isin(self.custodian, dead)] = -1
@@ -246,6 +286,7 @@ class Society:
         grown = al[self.alive[al] & (self.age[al] == 16)]
         for c in grown:
             r = self.pair[c]
+            if self.year >= self.w.record_from: self._log_kid(c, True)
             if r >= 0: self.pairs[r]['raised'] += 1
             self.pair[c] = -1; self.custodian[c] = -1
 
@@ -254,6 +295,19 @@ class Society:
         if self.year % 50 == 0:
             self.series.append(self.snapshot())
         self.year += 1
+
+    def _log_life(self, a):
+        self.lives.append({'age': int(self.age[a]), 'born': int(self.born_year[a]),
+                           'pairs': int(self.n_pairs[a]), 'committed': int(self.n_committed[a]),
+                           'first_pair': int(self.first_pair[a]), 'first_commit': int(self.first_commit[a]),
+                           'births': int(self.n_births[a])})
+
+    def _log_kid(self, c, survived):
+        r = self.pair[c]
+        if r < 0: return
+        rec = self.pairs[r]
+        status = 'together' if rec['end'] is None else rec['reason']
+        self.kids_out.append({'survived': survived, 'parents': status, 'orphan': self.custodian[c] < 0})
 
     def snapshot(self):
         a = np.flatnonzero(self.alive & (self.age >= 16))
@@ -269,5 +323,5 @@ class Society:
         a = np.flatnonzero(self.alive & (self.age >= 16))
         for r in self.pairs:
             if r['end'] is None: r['end'], r['reason'] = self.year, 'ongoing'
-        return {'series': self.series, 'pairs': self.pairs,
+        return {'series': self.series, 'pairs': self.pairs, 'lives': self.lives, 'kids': self.kids_out,
                 'final_genes': self.g[a].tolist(), 'final_traits': self.ph[a].tolist()}
