@@ -38,6 +38,7 @@ Read the full writeup in [`WRITEUP.md`](WRITEUP.md).
 | `experiments.py` | Replication, falsification tests and v2 experiments → `results.json`, `genomes.json` |
 | `WRITEUP.md` | The writeup |
 | `legacy/` | The original Phase 1–6 scripts, results and writeup |
+| `society/` | Study 8: an evolving society with heritable partner preferences and an investment ladder |
 
 ## Running
 
