@@ -25,6 +25,11 @@ continuous betrayal for every good round that came first**.
   curve we tried, even when specialising pays. Additive scoring lets specialists take over
   only when returns compound (96% specialists). Otherwise its pull is so weak that
   allocations drift at random.
+- **Phase 6:** with higher stakes and partners shaping each other's value, evolution made
+  agents pickier at the door (first-contact threshold 19 → 33) and stopped them
+  retaliating (0.70 → 0.22). It did not change when they leave. The blind spot stayed the
+  same size, but now costs real money: 74% of agents stay with a partner who defects 60%
+  of the time, losing 0.57 a round and 9 points of value over 100 rounds.
 
 **Correction to an earlier figure.** An earlier reading put the Phase 3 slope at 1.27.
 That number is a straight-line fit through all ten Phase 3 points. The top points are cut
@@ -302,6 +307,87 @@ well-rounded wins isn't a fixed fact. It depends on how a relationship combines 
 channels and on how investment pays off. Under conjunctive aggregation, being balanced
 isn't just optimal on paper. It is the only allocation selection actively holds in place.
 
+## Phase 6: high stakes, and partners who shape each other
+
+**Question.** In Phases 1–4, staying with a bad partner is cheap and staying with a good
+one pays only modestly. Value drifts only 1% a round and doesn't affect payoffs. What
+happens when relationships really matter? Good partners pay much more, bad ones cost
+every round, and partners change who each other becomes.
+
+**Design.** Same agents and belief mechanism, with two changes:
+
+| Outcome | Phases 1–4 | Phase 6 |
+| --- | --- | --- |
+| Both cooperate | 3 each | 4 × (partner's value / 50) each |
+| One defects on a cooperator | 5 to the defector, −1 to the cooperator | 6 to the defector, −4 to the cooperator |
+| Both defect | 0 each | −1 each |
+
+- **Value coupling.** Each round together, an agent's value moves 5% toward its partner's
+  (up from 1%). It also gains 0.5 for each cooperation the partner plays and loses 1 for
+  each defection. Value feeds back into what cooperating with the agent pays, and into
+  who it gets matched with next.
+
+We evolved the population for 100 generations under free exit across 5 seeds, the same
+settings as Phase 2. We then reran the Phase 4 intermittent-betrayal test (20 good rounds
+first) under the new stakes, with both the new genomes and the baseline-world genomes.
+
+### Results
+
+**Partners now change each other's lives.** Within a single 80-round generation, the SD
+of values across the population grows from 17.1 to 36.8. 71% of evolving agents end the
+generation more than 20 points above where they started, and 3.5% end more than 20 points
+below.
+
+**Evolution changed how agents behave in a relationship and at the door, but not when
+they leave.**
+
+| Gene | Baseline world (Phase 2, free exit) | High-stakes world |
+| --- | --- | --- |
+| `threshold` (reject on first contact) | 18.7 ± 4.3 | **32.6 ± 5.5** |
+| `prior_variance` | 2.06 ± 0.44 | 2.20 ± 0.50 |
+| `belief_exit_threshold` | −0.41 ± 0.08 | −0.47 ± 0.13 |
+| `retaliate_prob` | 0.70 ± 0.02 | **0.22 ± 0.04** |
+
+- **Agents became pickier at the door.** They now reject partners with value below about
+  33, up from 19, because a low-value partner pays much less.
+- **Agents stopped retaliating.** Punishing a defection with a defection now risks −1 a
+  round of mutual defection and drags the partner's value down, which lowers what
+  cooperation with them pays later. Absorbing a defection pays better.
+- **The exit rule didn't move.** θ is unchanged within error, so the predicted cutoff stays
+  at q ≈ 0.71. 34% of tit-for-tat agents are still trapped by defectors, the same as in
+  Phase 1.
+
+**So the blind spot didn't shrink. It got more expensive.**
+
+| Partner defects (q) | % who leave | Payoff per round while staying | Agent's value after 100 rounds (or at exit) |
+| --- | --- | --- | --- |
+| 10% | 0% | 3.24 | 57.0 |
+| 30% | 0% | 1.72 | 51.0 |
+| 40% | 0% | 0.97 | 48.0 |
+| 50% | 5.1% | 0.21 | 44.8 |
+| 60% | 25.7% | **−0.57** | 41.3 |
+| 70% | 48.7% | **−1.33** | 38.3 |
+| 80% | 72.0% | **−2.06** | 35.9 |
+| 100% | 94.6% | −3.47 | 33.3 |
+
+(High-stakes genomes; every agent starts at value 50 and the partner's value is fixed at
+50.)
+
+The leave rates match the baseline genomes and Phase 4 almost exactly. For example, at
+q = 0.7 the rate is 48.7% here versus 48.3% for baseline genomes and 48.0% in Phase 4.
+But in the high-stakes world, staying with a partner who defects 60% of the time *loses*
+0.57 a round and drags the agent's value from 50 to 41 within 100 rounds. Three in four
+agents still stay. The baseline genomes still retaliate 70% of the time, and against the
+same partner under the same new payoffs they earn +0.25 a round. The high-stakes genomes
+are hit harder because they no longer retaliate.
+
+**Why evolution didn't fix it.** The population contains no intermittent defectors. Pure
+defectors defect from round one and are caught at once, and other evolving agents mostly
+cooperate. The only mixed signals an agent ever sees come from 10% misperception of good
+partners, and leaving those would be a mistake. Selection can't tune a response to a kind
+of partner it never meets. Adding partially-defecting agents to the live population is
+the natural next test.
+
 ## Discussion and limitations
 
 The ability to exit is what saves evolving agents from tit for tat's tail. The same belief
@@ -340,6 +426,7 @@ python run_all.py   # Phases 1–2 → results.json
 python phase3.py    # Phase 3   → phase3.json
 python phase4.py    # Phase 4   → phase4.json (evolves and caches genomes_free.json, ~2 min)
 python phase5.py    # Phase 5   → phase5.json (~2 min)
+python phase6.py    # Phase 6   → phase6.json, genomes_highstakes.json (needs genomes_free.json from Phase 4, ~2 min)
 ```
 
 `run_all.py` and `phase3.py` write their output to the hardcoded path

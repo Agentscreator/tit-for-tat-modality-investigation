@@ -1,0 +1,162 @@
+{
+  "evolution": {
+    "threshold": [
+      32.63233708755254,
+      5.477805263044092
+    ],
+    "prior_variance": [
+      2.199222557859482,
+      0.49558961683067665
+    ],
+    "belief_exit_threshold": [
+      -0.47156610509357344,
+      0.12794917089646732
+    ],
+    "retaliate_prob": [
+      0.21947866366479984,
+      0.036520067394089986
+    ],
+    "evo_mean": [
+      290.55712503301027,
+      18.874460126740484
+    ],
+    "tft_mean": [
+      173.97250780447175,
+      12.21007286859907
+    ],
+    "def_mean": [
+      0.6612499999999997,
+      29.409196861942686
+    ],
+    "tft_stuck_pct": [
+      33.8,
+      2.5100247010736765
+    ],
+    "value_sd_start": [
+      17.067006557823454,
+      0.17625669338927477
+    ],
+    "value_sd_end": [
+      36.82096774715204,
+      0.27794259594015924
+    ],
+    "evo_rose20_pct": [
+      71.15,
+      5.81900531018833
+    ],
+    "evo_fell20_pct": [
+      3.54,
+      2.0053874837546983
+    ]
+  },
+  "intermittent": {
+    "high-stakes genomes|0.1": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 3.23931,
+      "value": 56.996276023777455
+    },
+    "high-stakes genomes|0.2": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 2.4781296666666663,
+      "value": 53.99405092938833
+    },
+    "high-stakes genomes|0.3": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 1.7249933333333336,
+      "value": 50.97266968044331
+    },
+    "high-stakes genomes|0.4": {
+      "leave_pct": 0.03333333333333333,
+      "median_lag": 110.0,
+      "payoff_per_round": 0.973932606060606,
+      "value": 47.998092766995796
+    },
+    "high-stakes genomes|0.5": {
+      "leave_pct": 5.1,
+      "median_lag": 330.0,
+      "payoff_per_round": 0.21216039769688314,
+      "value": 44.837799641096495
+    },
+    "high-stakes genomes|0.6": {
+      "leave_pct": 25.7,
+      "median_lag": 139.0,
+      "payoff_per_round": -0.5701028482083055,
+      "value": 41.33572739826696
+    },
+    "high-stakes genomes|0.7": {
+      "leave_pct": 48.733333333333334,
+      "median_lag": 102.0,
+      "payoff_per_round": -1.3251147063758102,
+      "value": 38.25899535286011
+    },
+    "high-stakes genomes|0.8": {
+      "leave_pct": 72.0,
+      "median_lag": 81.0,
+      "payoff_per_round": -2.064790496408701,
+      "value": 35.873861590736205
+    },
+    "high-stakes genomes|1.0": {
+      "leave_pct": 94.6,
+      "median_lag": 45.0,
+      "payoff_per_round": -3.4651011547406583,
+      "value": 33.27182858644325
+    },
+    "baseline genomes|0.1": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 3.3453753333333336,
+      "value": 56.99610542234007
+    },
+    "baseline genomes|0.2": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 2.7061083333333333,
+      "value": 54.05272868052828
+    },
+    "baseline genomes|0.3": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 2.0817663333333334,
+      "value": 51.102556711178494
+    },
+    "baseline genomes|0.4": {
+      "leave_pct": 0.0,
+      "median_lag": null,
+      "payoff_per_round": 1.4686200000000003,
+      "value": 48.0087805554882
+    },
+    "baseline genomes|0.5": {
+      "leave_pct": 4.3,
+      "median_lag": 330.0,
+      "payoff_per_round": 0.8637842758593002,
+      "value": 44.95014486194341
+    },
+    "baseline genomes|0.6": {
+      "leave_pct": 25.566666666666666,
+      "median_lag": 149.0,
+      "payoff_per_round": 0.24775040276386268,
+      "value": 41.36687740638787
+    },
+    "baseline genomes|0.7": {
+      "leave_pct": 48.333333333333336,
+      "median_lag": 101.0,
+      "payoff_per_round": -0.3413582103725809,
+      "value": 38.263491771864764
+    },
+    "baseline genomes|0.8": {
+      "leave_pct": 68.06666666666666,
+      "median_lag": 75.0,
+      "payoff_per_round": -0.9016587985638653,
+      "value": 35.936351784619305
+    },
+    "baseline genomes|1.0": {
+      "leave_pct": 95.8,
+      "median_lag": 46.0,
+      "payoff_per_round": -1.9587455210534765,
+      "value": 33.16719479850846
+    }
+  }
+}

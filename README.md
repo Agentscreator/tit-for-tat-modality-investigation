@@ -38,6 +38,12 @@ a long time to build also take a long time to lose?
   scoring, populations stay close to balanced (6–15% specialists) even when specialising
   pays. Under additive scoring, specialists take over (96%) only when returns compound.
   Otherwise the split drifts at random.
+- **Phase 6, high stakes.** In this phase, cooperation pays 4 × the partner's value / 50,
+  the sucker loses 4, and mutual defection costs 1. Partners also pull each other's value
+  up or down every round. Evolution responded by making agents pickier at the door
+  (threshold 19 → 33) and less retaliatory (0.70 → 0.22), but the exit rule didn't move.
+  74% of agents still stay with a partner who defects 60% of the time, now losing 0.57 a
+  round.
 
 The full writeup is in [`WRITEUP.md`](WRITEUP.md).
 
@@ -73,9 +79,11 @@ The full writeup is in [`WRITEUP.md`](WRITEUP.md).
 | `phase3.py` | Phase 3 controlled betrayal test → `phase3.json` |
 | `phase4.py` | Phase 4 intermittent betrayal test → `phase4.json` |
 | `phase5.py` | Phase 5 channel-allocation tournament → `phase5.json` |
-| `results.json`, `phase3.json`, `phase4.json`, `phase5.json` | Saved results (seeds 1–5) |
+| `phase6.py` | Phase 6 high-stakes world with value coupling → `phase6.json` |
+| `results.json`, `phase3.json`–`phase6.json` | Saved results (seeds 1–5) |
+| `genomes_highstakes.json` | Final genomes evolved in the Phase 6 world |
 | `genomes_free.json` | Final genomes evolved under free exit, 5 seeds × 200 (cached by `phase4.py`) |
-| `WRITEUP.md` | Full writeup of all five phases |
+| `WRITEUP.md` | Full writeup of all six phases |
 
 ## Running
 
@@ -85,6 +93,7 @@ python run_all.py   # Phases 1–2
 python phase3.py    # Phase 3
 python phase4.py    # Phase 4 (~2 min the first time, while it evolves genomes)
 python phase5.py    # Phase 5 (~2 min)
+python phase6.py    # Phase 6 (~2 min; run Phase 4 first)
 ```
 
 `run_all.py` and `phase3.py` write their output to the hardcoded path `/home/claude/study7/`. Change that
